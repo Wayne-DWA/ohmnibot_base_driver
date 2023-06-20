@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<launch>
+  <node name="ohmnibot_base_driver_node" pkg="ohmnibot_base_driver" type="ohmnibot_base_driver_node" output="screen" >
+    <rosparam file="$(find ohmnibot_base_driver)/cfg/ohmni-bot.yaml" command="load" />
+  </node>
+</launch>

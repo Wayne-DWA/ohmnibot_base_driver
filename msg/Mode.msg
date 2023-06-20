@@ -1,0 +1,19 @@
+uint8 value
+
+# defined enums that have to be used for mode
+# driving mode
+uint8 INACTIVE=1
+uint8 REMOTE_CONTROLLED=2
+uint8 FLEET=4
+# 8 is not used yet
+uint8 MASK_UNSET_DRIVING_MODE=240
+
+# kinematic mode
+uint8 SKID_DRIVE=16
+uint8 MECANUM_DRIVE=32
+uint8 MASK_UNSET_KINEMATIC_MODE=207
+
+# collision avoidance
+uint8 COLLISION_AVOIDANCE_OVERRIDE_ENABLED=64
+uint8 COLLISION_AVOIDANCE_OVERRIDE_DISABLED=128
+uint8 MASK_UNSET_COLLISION_AVOIDANCE_OVERRIDE=63
