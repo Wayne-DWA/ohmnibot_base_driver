@@ -140,8 +140,8 @@ void SingleChannelMotorControllerHardware::processSetValue(const Rpm& rpm)
   }
   auto response = got.response();
   // \todo process feedback
-  // _callback_process_measurement(AcknowledgedMotorRpm::rpm0(response));  
-  _callback_process_measurement(0.0);
+  _callback_process_measurement(AcknowledgedMotorRpm::rpm0(response));  
+  // _callback_process_measurement(0.0);
 }
 
 

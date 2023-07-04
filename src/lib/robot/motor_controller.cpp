@@ -19,18 +19,18 @@ MotorController::Parameter MotorController::get_parameter(const std::string& nam
     // ROS_INFO(_logger_prefix <<"get parameters from server");
     ros::NodeHandle privateNh("~");
 
-    privateNh.param(prefix + ".inverted", parameter.inverted, default_parameter.inverted);
-    privateNh.param(prefix + ".gear_ratio", parameter.gear_ratio,default_parameter.gear_ratio);
-    privateNh.param(prefix + ".encoder_ratio", parameter.encoder_ratio, default_parameter.encoder_ratio);
-    privateNh.param(prefix + ".max_rpm", parameter.max_rpm, default_parameter.max_rpm);
-    privateNh.param(prefix + ".control_frequency", parameter.control_frequency, default_parameter.control_frequency);
-    privateNh.param(prefix + ".pid.kp", parameter.kp, default_parameter.kp);
-    privateNh.param(prefix + ".pid.ki", parameter.ki, default_parameter.ki);
-    privateNh.param(prefix + ".pid.kd", parameter.kd, default_parameter.kd);
-    privateNh.param(prefix + ".weight_low_pass_set_point", parameter.weight_low_pass_set_point, default_parameter.weight_low_pass_set_point);
-    privateNh.param(prefix + ".weight_low_pass_encoder", parameter.weight_low_pass_encoder, default_parameter.weight_low_pass_encoder);
-    privateNh.param(prefix + ".encoder_inverted", parameter.encoder_inverted, default_parameter.encoder_inverted);
-    privateNh.param(prefix + ".closed_loop", parameter.closed_loop, default_parameter.closed_loop);
+    privateNh.param(prefix + "_inverted", parameter.inverted, default_parameter.inverted);
+    privateNh.param(prefix + "_gear_ratio", parameter.gear_ratio,default_parameter.gear_ratio);
+    privateNh.param(prefix + "_encoder_ratio", parameter.encoder_ratio, default_parameter.encoder_ratio);
+    privateNh.param(prefix + "_max_rpm", parameter.max_rpm, default_parameter.max_rpm);
+    privateNh.param(prefix + "_control_frequency", parameter.control_frequency, default_parameter.control_frequency);
+    privateNh.param(prefix + "_pid_kp", parameter.kp, default_parameter.kp);
+    privateNh.param(prefix + "_pid_ki", parameter.ki, default_parameter.ki);
+    privateNh.param(prefix + "_pid_kd", parameter.kd, default_parameter.kd);
+    privateNh.param(prefix + "_weight_low_pass_set_point", parameter.weight_low_pass_set_point, default_parameter.weight_low_pass_set_point);
+    privateNh.param(prefix + "_weight_low_pass_encoder", parameter.weight_low_pass_encoder, default_parameter.weight_low_pass_encoder);
+    privateNh.param(prefix + "_encoder_inverted", parameter.encoder_inverted, default_parameter.encoder_inverted);
+    privateNh.param(prefix + "_closed_loop", parameter.closed_loop, default_parameter.closed_loop);
     return parameter;
 }
 

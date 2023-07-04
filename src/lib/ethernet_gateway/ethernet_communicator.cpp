@@ -253,10 +253,10 @@ tcp::message::RxMessageDataBuffer EthernetCommunicator::receivingData()
   std::copy(std::begin(buffer), std::begin(buffer) + received_bytes, rx_buffer.begin());
   
   std::cout << std::hex;
-  for (const auto byte : rx_buffer) {
-    std::cout << static_cast<int>(byte) << " ";
-  }
-  std::cout << std::dec << std::endl;
+  // for (const auto byte : rx_buffer) {
+  //   std::cout << static_cast<int>(byte) << " ";
+  // }
+  // std::cout << std::dec << std::endl;
 
   return rx_buffer;
 }

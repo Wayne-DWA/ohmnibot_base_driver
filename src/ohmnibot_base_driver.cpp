@@ -68,15 +68,17 @@ bool Ohmnibot::loadParameter()
     privateNh.param("topic_pub_joint_states", _parameter.topic_joint_states, std::string("base_joint_states"));
     privateNh.param("timeout_cmd_vel", _parameter.timeout_cmd_vel,0.5);
 
-    privateNh.param("mecanum.length.x", _parameter.mecanum.length.x,0.25);
-    privateNh.param("mecanum.length.y", _parameter.mecanum.length.y,0.36);
-    privateNh.param("mecanum.wheel_diameter", _parameter.mecanum.wheel_diameter,0.1);
+    privateNh.param("mecanum_length_x", _parameter.mecanum.length.x,0.25);
+    privateNh.param("mecanum_length_y", _parameter.mecanum.length.y,0.36);
+    privateNh.param("mecanum_wheel_diameter", _parameter.mecanum.wheel_diameter,0.1);
     return true;
 }
 void Ohmnibot::cbCmdVel(const geometry_msgs::Twist::ConstPtr& twist_msg)
 {
   // Kick Watch Dog
   // _timer_status_report->reset();
+      _hardware_interface->enable();
+
   _stamp_cmd_vel     = ros::Time::now();
   try {
     // \todo maybe a size check would be great!
@@ -100,24 +102,8 @@ void Ohmnibot::cbCmdVel(const geometry_msgs::Twist::ConstPtr& twist_msg)
     for (Eigen::Index i = 0; i < radps.size(); ++i) {
         _motor_controllers[i]->setRpm(Rpm::fromRadps(radps(i)) * reduce_factor);
     }
-    // Calculating Odometry and Publishing it
-    Eigen::VectorXf radps_measured(_motor_controllers.size());
+    odom_updated =true;
 
-    for (std::size_t i = 0; i < _motor_controllers.size(); ++i) {
-      radps_measured(i) = _motor_controllers[i]->getMeasuredRpm().radps();
-    }
-
-    const Eigen::Vector3f velocity_measured = _inverse_kinematic_matrix * radps_measured;
-    _odometry_component->process(velocity_measured);
-    _pub_odometry.publish(_odometry_component->getOdometryMessage(
-      getFrameIdPrefix() + _parameter.tf_footprint_frame, getFrameIdPrefix() + "odom"
-    ));
-
-    if (_parameter.publish_tf_odom) {
-      _tf_broadcaster.sendTransform(_odometry_component->getTfMessage(
-        getFrameIdPrefix() + _parameter.tf_footprint_frame, getFrameIdPrefix() + "odom"
-      ));
-    }
   }
   catch (HardwareError& ex) {
     ROS_ERROR_STREAM(_logger_prefix <<"Hardware error occurred while trying to set new values for motor controller."
@@ -128,7 +114,99 @@ void Ohmnibot::cbCmdVel(const geometry_msgs::Twist::ConstPtr& twist_msg)
                                       << " what() = " << ex.what());     
   }
 }
+void Ohmnibot::pubOdom()
+{
+    // Estimate delta t
 
+    _last_processing = ros::Time::now();
+
+    const auto now = ros::Time::now();
+    const double dt = (now - _last_processing).toSec();
+    _last_processing = now;
+    // Calculating Odometry and Publishing it
+    Eigen::VectorXf radps_measured(_motor_controllers.size());
+    for (std::size_t i = 0; i < _motor_controllers.size(); ++i) 
+    {
+      radps_measured(i) = _motor_controllers[i]->getMeasuredRpm().radps();
+    }
+
+    const Eigen::Vector3f velocity_measured = _inverse_kinematic_matrix * radps_measured;
+  
+
+    // Processing Velocity
+    _linear_velocity_x = velocity_measured.x();
+    _linear_velocity_y = velocity_measured.y();
+    _angular_velocity_z = velocity_measured.z();
+
+    const Eigen::Vector2f liner_velocity(_linear_velocity_x, _linear_velocity_y);
+    const Eigen::Vector2f direction = Eigen::Rotation2Df(_orientation) * liner_velocity;
+
+    _orientation += _angular_velocity_z * dt;
+    _position_x  += direction.x() * dt;
+    _position_y  += direction.y() * dt;
+
+
+
+    // Constructing Message
+    nav_msgs::Odometry odometry_msg;
+    odometry_msg.header.stamp = ros::Time::now();
+    odometry_msg.header.frame_id = "odom";
+    odometry_msg.child_frame_id = "base_footprint";
+
+    // Twist Part
+    odometry_msg.twist.twist.linear.x = _linear_velocity_x;
+    odometry_msg.twist.twist.linear.y = _linear_velocity_y;
+    odometry_msg.twist.twist.linear.z = 0.0;
+
+    odometry_msg.twist.twist.angular.x = 0.0;
+    odometry_msg.twist.twist.angular.y = 0.0;
+    odometry_msg.twist.twist.angular.z = _angular_velocity_z;
+
+    odometry_msg.twist.covariance.fill(0.0);
+
+    // Pose Part
+    const Eigen::Quaternionf q_orientation(Eigen::AngleAxisf(_orientation, Eigen::Vector3f::UnitZ()));
+    odometry_msg.pose.pose.orientation.w = q_orientation.w();
+    odometry_msg.pose.pose.orientation.x = q_orientation.x();
+    odometry_msg.pose.pose.orientation.y = q_orientation.y();
+    odometry_msg.pose.pose.orientation.z = q_orientation.z();
+
+    odometry_msg.pose.pose.position.x = _position_x;
+    odometry_msg.pose.pose.position.y = _position_y;
+    odometry_msg.pose.pose.position.z = 0.0;
+
+    odometry_msg.twist.covariance = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0,   
+                        0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 
+                        0.0, 0.0, 1.0, 0.0, 0.0, 0.0,
+                        0.0, 0.0, 0.0, 1.0, 0.0, 0.0,   
+                        0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 
+                        0.0, 0.0, 0.0, 0.0, 0.0, 1.0};
+
+    // odometry_msg.pose.covariance.fill(0.0);
+    
+    _pub_odometry.publish(odometry_msg);
+
+    if (_parameter.publish_tf_odom) 
+    {
+      geometry_msgs::TransformStamped tf_msg;
+      tf_msg.header.frame_id = "odom";
+      tf_msg.header.stamp    = ros::Time::now();
+      tf_msg.child_frame_id  = "base_footprint";
+      
+      tf_msg.transform.translation.x = _position_x;
+      tf_msg.transform.translation.y = _position_y;
+      tf_msg.transform.translation.z = 0.0;
+
+      const Eigen::Quaternionf q_orientation(Eigen::AngleAxisf(_orientation, Eigen::Vector3f::UnitZ()));
+      tf_msg.transform.rotation.x = q_orientation.x();
+      tf_msg.transform.rotation.y = q_orientation.y();
+      tf_msg.transform.rotation.z = q_orientation.z();
+      tf_msg.transform.rotation.w = q_orientation.w();
+
+      _tf_broadcaster.sendTransform(tf_msg);
+    }
+  odom_updated = false;
+}
 void Ohmnibot::registerMotorController(std::shared_ptr<MotorController> motor_controller)
 {
   const auto search = _motor_controllers.find(motor_controller->id());
@@ -217,8 +295,9 @@ Eigen::MatrixXf Ohmnibot::getKinematicMatrix(const Mode mode)
     kinematic_matrix.resize(4, 3);
     kinematic_matrix <<  1.0f, -1.0f, (l_x + l_y) * 0.5f,
                          1.0f,  1.0f, (l_x + l_y) * 0.5f,
-                        -1.0f, -1.0f, (l_x + l_y) * 0.5f,
+                        1.0f, 1.0f, -(l_x + l_y) * 0.5f,
                         -1.0f,  1.0f, (l_x + l_y) * 0.5f;
+                        // 1 2 3 4
     kinematic_matrix *= 1.0f / wheel_radius;    
   }
   else {

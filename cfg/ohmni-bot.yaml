@@ -1,78 +1,62 @@
 
 tf_base_frame: base_link
 tf_footprint_frame: base_footprint
-publish_tf_odom: false
+publish_tf_odom: true
 sub_twist_topic: cmd_vel
 pub_odom_topic: odom
 enable_joint_state_publisher: false
 timeout_cmd_vel: 0.5
+mecanum_length_x: 0.52
+mecanum_length_y: 0.27
+mecanum_wheel_diameter: 0.1
 
-mecanum:
-  length:
-    x: 0.25
-    y: 0.36
-  wheel_diameter: 0.1
   
 
-# use_sim_time: false
+motor_a_closed_loop: true    
+motor_a_control_frequency: 16000
+motor_a_encoder_inverted: true
+motor_a_encoder_ratio: 4096.0
+motor_a_gear_ratio: 14.0
+motor_a_max_rpm: 150.0
+motor_a_pid_kd: 0.0
+motor_a_pid_ki: 7.0
+motor_a_pid_kp: 0.5
+motor_a_weight_low_pass_encoder: 0.8
+motor_a_weight_low_pass_set_point: 0.8
 
-# imu:
-#   fusion_weight: 0.005
-#   mounting_orientation:
-#     pitch: 0.0
-#     roll: 0.0
-#     yaw: 0.0 
-#   raw_data_mode: false
+motor_b_closed_loop: true    
+motor_b_control_frequency: 16000
+motor_b_encoder_inverted: true      
+motor_b_encoder_ratio: 4096.0
+motor_b_gear_ratio: 14.0
+motor_b_max_rpm: 150.0
+motor_b_pid_kd: 0.0
+motor_b_pid_ki: 7.0
+motor_b_pid_kp: 0.5
+motor_b_weight_low_pass_encoder: 0.8
+motor_b_weight_low_pass_set_point: 0.8
 
-motor_a:
-  closed_loop: true    
-  control_frequency: 16000
-  encoder_inverted: true
-  encoder_ratio: 4096.0
-  gear_ratio: 14.0
-  max_rpm: 90.0
-  pid/kd: 0.0
-  pid/ki: 7.0
-  pid/kp: 0.5
-  weight_low_pass_encoder: 0.8
-  weight_low_pass_set_point: 0.8
+motor_c_closed_loop: true 
+motor_c_control_frequency: 16000
+motor_c_encoder_inverted: false
+motor_c_encoder_ratio: 4096.0
+motor_c_gear_ratio: 14.0
+motor_c_max_rpm: 150.0
+motor_c_pid_kd: 0.0
+motor_c_pid_ki: 7.0
+motor_c_pid_kp: 0.5
+motor_c_weight_low_pass_encoder: 0.8
+motor_c_weight_low_pass_set_point: 0.8
 
-motor_b:
-  closed_loop: true    
-  control_frequency: 16000
-  encoder_inverted: true      
-  encoder_ratio: 4096.0
-  gear_ratio: 14.0
-  max_rpm: 90.0
-  pid/kd: 0.0
-  pid/ki: 7.0
-  pid/kp: 0.5
-  weight_low_pass_encoder: 0.8
-  weight_low_pass_set_point: 0.8
-
-motor_c:
-  closed_loop: true   
-  control_frequency: 16000
-  encoder_inverted: false
-  encoder_ratio: 4096.0
-  gear_ratio: 14.0
-  max_rpm: 90.0
-  pid/kd: 0.0
-  pid/ki: 7.0
-  pid/kp: 0.5
-  weight_low_pass_encoder: 0.8
-  weight_low_pass_set_point: 0.8
-
-motor_d:
-  closed_loop: true   
-  control_frequency: 16000
-  encoder_inverted: true      
-  encoder_ratio: 4096.0
-  gear_ratio: 14.0
-  max_rpm: 90.0
-  pid/kd: 0.0
-  pid/ki: 7.0
-  pid/kp: 0.5
-  weight_low_pass_encoder: 0.8
-  weight_low_pass_set_point: 0.8
+motor_d_closed_loop: true   
+motor_d_control_frequency: 16000
+motor_d_encoder_inverted: true      
+motor_d_encoder_ratio: 4096.0
+motor_d_gear_ratio: 14.0
+motor_d_max_rpm: 150.0
+motor_d_pid_kd: 0.0
+motor_d_pid_ki: 7.0
+motor_d_pid_kp: 0.5
+motor_d_weight_low_pass_encoder: 0.8
+motor_d_weight_low_pass_set_point: 0.8
 

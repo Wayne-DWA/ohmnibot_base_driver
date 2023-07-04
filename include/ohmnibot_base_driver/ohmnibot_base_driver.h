@@ -88,6 +88,8 @@ protected:
    * \param twist_msg Received twist message.
    */
   void cbCmdVel(const geometry_msgs::Twist::ConstPtr& twist_msg);
+  void pubOdom();
+
   // void callbackServiceGetKinematicDescription(
   //   const std::shared_ptr<edu_robot::srv::GetKinematicDescription::Request> request,
   //   std::shared_ptr<edu_robot::srv::GetKinematicDescription::Response> response);
@@ -133,6 +135,16 @@ private:
    tf2_ros::TransformBroadcaster _tf_broadcaster;
 
   std::string _logger_prefix;
+
+
+  AnglePiToPi _orientation = 0.0;
+  float _position_x = 0.0f;
+  float _position_y = 0.0f;
+  float _linear_velocity_x = 0.0f;
+  float _linear_velocity_y = 0.0f;
+  float _angular_velocity_z = 0.0f;
+  ros::Time _last_processing;
+
 
 
 //   std::shared_ptr<rclcpp::Publisher<nav_msgs::msg::Odometry>> _pub_odometry;

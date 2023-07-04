@@ -15,6 +15,7 @@ public:
       )
   {
     auto shield = std::dynamic_pointer_cast<eduart::robot::ethernet::EthernetGatewayShield>(_hardware_interface);
+    shield->enable();
     auto factory = eduart::robot::ethernet::HardwareComponentFactory(shield);
 
     factory.addSingleChannelMotorController("motor", "motor_hardware");
@@ -22,15 +23,22 @@ public:
 
     initialize(factory);
   }
+
+  void odomPublisher()
+  {
+    pubOdom();
+  }
 };
 
 int main(int argc, char** argv)
 {
     ros::init(argc, argv,"Ohmnibot_Base_Driver_Node");
+
     EthernetGatewayOhmniBot egob;
-    ros::Rate loop_rate_hz(30);
+    ros::Rate loop_rate_hz(50);
     while(ros::ok())
     {
+        egob.odomPublisher();
         ros::spinOnce();
         loop_rate_hz.sleep();
     }
