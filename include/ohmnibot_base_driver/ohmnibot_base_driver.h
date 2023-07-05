@@ -144,7 +144,11 @@ private:
   float _linear_velocity_y = 0.0f;
   float _angular_velocity_z = 0.0f;
   ros::Time _last_processing;
-
+  bool odom_init = false;
+  bool odom_updated = false;
+  float odom_cali_factor_x = 1.0f;
+  float odom_cali_factor_y = 1.0f;
+  float odom_cali_factor_yaw = 1.0f;
 
 
 //   std::shared_ptr<rclcpp::Publisher<nav_msgs::msg::Odometry>> _pub_odometry;

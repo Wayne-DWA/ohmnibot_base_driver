@@ -117,26 +117,36 @@ void Ohmnibot::cbCmdVel(const geometry_msgs::Twist::ConstPtr& twist_msg)
 void Ohmnibot::pubOdom()
 {
     // Estimate delta t
-
-    _last_processing = ros::Time::now();
-
+    if(!odom_init) 
+    {
+      _last_processing = ros::Time::now();
+      odom_init = true;
+    }
     const auto now = ros::Time::now();
     const double dt = (now - _last_processing).toSec();
     _last_processing = now;
     // Calculating Odometry and Publishing it
     Eigen::VectorXf radps_measured(_motor_controllers.size());
-    for (std::size_t i = 0; i < _motor_controllers.size(); ++i) 
+    if(odom_updated)
     {
-      radps_measured(i) = _motor_controllers[i]->getMeasuredRpm().radps();
+            for (std::size_t i = 0; i < _motor_controllers.size(); ++i) {
+        radps_measured(i) = _motor_controllers[i]->getMeasuredRpm().radps();
+      }
     }
-
+    else 
+    {
+      for (std::size_t i = 0; i < _motor_controllers.size(); ++i) {
+        radps_measured(i) = 0;
+      }
+    }
     const Eigen::Vector3f velocity_measured = _inverse_kinematic_matrix * radps_measured;
-  
+    // ROS_INFO_STREAM(_logger_prefix <<"velocity_measured: x = "
+    //                                   << velocity_measured.x()<< ", y = "<<velocity_measured.y());    
 
     // Processing Velocity
-    _linear_velocity_x = velocity_measured.x();
-    _linear_velocity_y = velocity_measured.y();
-    _angular_velocity_z = velocity_measured.z();
+    _linear_velocity_x = velocity_measured.x()*odom_cali_factor_x;
+    _linear_velocity_y = velocity_measured.y()*odom_cali_factor_y;
+    _angular_velocity_z = velocity_measured.z()*odom_cali_factor_yaw;
 
     const Eigen::Vector2f liner_velocity(_linear_velocity_x, _linear_velocity_y);
     const Eigen::Vector2f direction = Eigen::Rotation2Df(_orientation) * liner_velocity;
@@ -185,6 +195,7 @@ void Ohmnibot::pubOdom()
     // odometry_msg.pose.covariance.fill(0.0);
     
     _pub_odometry.publish(odometry_msg);
+    // ROS_DEBUG("odom published");
 
     if (_parameter.publish_tf_odom) 
     {
